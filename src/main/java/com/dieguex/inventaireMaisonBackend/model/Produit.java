@@ -1,6 +1,7 @@
 package com.dieguex.inventaireMaisonBackend.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 public class Produit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(AccessLevel.PRIVATE)
     private Long id;
 
     private String nom;
@@ -26,7 +28,6 @@ public class Produit {
 
     protected Produit(){}
     protected Produit(Builder builder){
-        this.id = builder.id;
         this.nom = builder.nom;
         this.quantite = builder.quantite;
         this.quantiteMinimal = builder.quantiteMinimal;
@@ -36,19 +37,12 @@ public class Produit {
     }
 
     public static class Builder{
-        private Long id;
         private String nom;
         private double quantite;
         private double quantiteMinimal;
         private LocalDate dateLimiteConsommation;
         private CategorieProduit categorieProduit;
         private Famille famille;
-
-
-        public Builder setId(Long id) {
-            this.id = id;
-            return this;
-        }
 
         public Builder setNom(String nom) {
             this.nom = nom;

@@ -1,20 +1,31 @@
 package com.dieguex.inventaireMaisonBackend.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+
+import java.util.UUID;
 
 @Entity
 @Setter
 @Getter
+@ToString
 public class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(AccessLevel.PRIVATE)
     private Long id;
+
+    @Column(nullable = false, unique = true)
+    @Setter(AccessLevel.PRIVATE)
+    private UUID uuid;
 
     private String nom;
     private String courriel;
     private String motPasse;
+
 
     @ManyToOne
     @JoinColumn(name = "famille_id")
@@ -22,24 +33,21 @@ public class Utilisateur {
 
     protected Utilisateur(){}
     protected Utilisateur(Builder builder){
-        this.id = builder.id;
         this.nom = builder.nom;
         this.courriel = builder.courriel;
         this.motPasse = builder.motPasse;
         this.famille = builder.famille;
     }
+    @PrePersist
+    protected void onCreate(){
+        if (this.uuid == null) this.uuid = UUID.randomUUID();
+    }
 
     public static class Builder{
-        private Long id;
         private String nom;
         private String courriel;
         private String motPasse;
         private Famille famille;
-
-        public Builder setId(Long id) {
-            this.id = id;
-            return this;
-        }
 
         public Builder setNom(String nom) {
             this.nom = nom;

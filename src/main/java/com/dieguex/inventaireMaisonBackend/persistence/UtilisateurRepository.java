@@ -20,4 +20,6 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
             WHERE f.uuid = :familleUuid
         """)
     Optional<List<Utilisateur>> trouverUtilisateursParFamille(@Param("familleUuid") UUID familleUuid);
+
+    boolean existsByCourriel(String email);
 }

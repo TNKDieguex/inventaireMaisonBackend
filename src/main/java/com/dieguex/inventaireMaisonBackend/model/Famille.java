@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,16 +25,16 @@ public class Famille {
 
 
     @OneToMany(mappedBy = "famille", cascade = CascadeType.ALL)
-    private List<Utilisateur> listeUtilisateurs;
+    private List<Utilisateur> listeUtilisateurs = new ArrayList<>();
 
     @OneToMany(mappedBy = "famille", cascade = CascadeType.ALL)
-    private List<Produit> listeProduits;
+    private List<Produit> listeProduits = new ArrayList<>();
 
     protected Famille(){}
     protected Famille(Builder builder){
         this.nomFamille = builder.nomFamille;
-        this.listeUtilisateurs = builder.listeUtilisateurs;
-        this.listeProduits = builder.listeProduits;
+        if (builder.listeUtilisateurs != null) this.listeUtilisateurs = builder.listeUtilisateurs;
+        if (builder.listeProduits != null) this.listeProduits = builder.listeProduits;
     }
     @PrePersist
     protected void onCreate(){

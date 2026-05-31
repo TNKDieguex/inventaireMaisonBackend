@@ -2,6 +2,7 @@ package com.dieguex.inventaireMaisonBackend.dto;
 
 import com.dieguex.inventaireMaisonBackend.model.CategorieProduit;
 import com.dieguex.inventaireMaisonBackend.model.Produit;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 
@@ -9,6 +10,7 @@ public record ProduitDto(
         String nom,
         double quantite,
         double quantiteMinimal,
+        @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate dateLimiteConsommation,
         CategorieProduit categorieProduit
 ) {

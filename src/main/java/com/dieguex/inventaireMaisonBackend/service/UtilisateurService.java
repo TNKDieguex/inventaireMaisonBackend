@@ -1,9 +1,7 @@
 package com.dieguex.inventaireMaisonBackend.service;
 
 import com.dieguex.inventaireMaisonBackend.dto.LoginRequestDto;
-import com.dieguex.inventaireMaisonBackend.exceptions.FamilleException;
-import com.dieguex.inventaireMaisonBackend.exceptions.ProduitException;
-import com.dieguex.inventaireMaisonBackend.exceptions.UtilisateurException;
+import com.dieguex.inventaireMaisonBackend.exceptions.*;
 import com.dieguex.inventaireMaisonBackend.dto.FamilleDto;
 import com.dieguex.inventaireMaisonBackend.dto.ProduitDto;
 import com.dieguex.inventaireMaisonBackend.dto.UtilisateurDto;
@@ -41,9 +39,20 @@ public class UtilisateurService {
     }
 
     @Transactional(rollbackFor = UtilisateurException.class)
+    public Optional<UtilisateurDto> creerUtilisateur(UtilisateurDto utilisateurDto) throws UtilisateurException {
+        String motDePasseHache = passwordEncoder.encode(utilisateurDto.motPasse());
+
+        if (utilisateurRepository.existsByCourriel(utilisateurDto.courriel())) {
+            throw new UtilisateurExistantException("Un utilisateur avec cet courriel existe déjà");
+        }
+        Utilisateur utilisateur = UtilisateurDto.versEntite(utilisateurDto, motDePasseHache);
+        return Optional.of(UtilisateurDto.versDto(utilisateurRepository.save(utilisateur)));
+    }
+
+    @Transactional(rollbackFor = UtilisateurException.class)
     public Optional<FamilleDto> creerFamille(UUID utilisateurUuid, String nomFamille) throws UtilisateurException{
         Utilisateur utilisateur = utilisateurRepository.findByUuid(utilisateurUuid)
-                .orElseThrow(() -> new UtilisateurException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
         if (utilisateur.getFamille() != null) {
             throw new UtilisateurException("L'utilisateur est déjà dans une famille");
         }
@@ -59,9 +68,9 @@ public class UtilisateurService {
     @Transactional(rollbackFor = {UtilisateurException.class, FamilleException.class})
     public Optional<UtilisateurDto> seJoindreAUneFamille(UUID utilisateurUuid, UUID familleUuid)throws UtilisateurException, FamilleException {
         Utilisateur utilisateur = utilisateurRepository.findByUuid(utilisateurUuid)
-                .orElseThrow(() -> new UtilisateurException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
         Famille famille = familleRepository.findByUuid(familleUuid)
-                .orElseThrow(() -> new FamilleException("Famille non trouvée"));
+                .orElseThrow(() -> new FamilleNonTrouveException("Famille non trouvée"));
 
         if (utilisateur.getFamille() != null) {
             throw new FamilleException("L'utilisateur est déjà dans une famille");
@@ -71,21 +80,11 @@ public class UtilisateurService {
         return Optional.of(UtilisateurDto.versDto(utilisateur));
     }
 
-    @Transactional(rollbackFor = UtilisateurException.class)
-    public Optional<UtilisateurDto> creerUtilisateur(UtilisateurDto utilisateurDto) throws UtilisateurException {
-        String motDePasseHache = passwordEncoder.encode(utilisateurDto.motPasse());
-
-        if (utilisateurRepository.existsByCourriel(utilisateurDto.courriel())) {
-            throw new UtilisateurException("Un utilisateur avec cet courriel existe déjà");
-        }
-        Utilisateur utilisateur = UtilisateurDto.versEntite(utilisateurDto, motDePasseHache);
-        return Optional.of(UtilisateurDto.versDto(utilisateurRepository.save(utilisateur)));
-    }
 
     @Transactional(rollbackFor = {ProduitException.class, FamilleException.class})
     public Optional<List<ProduitDto>> creerProduit(List<ProduitDto> produitDtoList, UUID familleUuid) throws ProduitException, FamilleException {
         Famille famille = familleRepository.findByUuid(familleUuid).orElseThrow(
-                () -> new FamilleException("Famille non trouvée"));
+                () -> new FamilleNonTrouveException("Famille non trouvée"));
 
         List<Produit> produits = produitDtoList.stream().map(ProduitDto::versEntite).toList();
         produits.forEach((produit) -> {
@@ -117,34 +116,34 @@ public class UtilisateurService {
         return Optional.of(ProduitDto.versDto(produit));
     }
 
-    public Optional<UtilisateurDto> seConnecter(LoginRequestDto loginRequestDto) throws UtilisateurException{
+    public Optional<UtilisateurDto> seConnecter(LoginRequestDto loginRequestDto) throws UtilisateurException, LoginUtilisateurException {
         Utilisateur utilisateur = utilisateurRepository.findByCourriel(loginRequestDto.courriel()).orElseThrow(
-                () -> new UtilisateurException("Utilisateur non trouvé"));
+                () -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
         boolean motDePasseValide = passwordEncoder.matches(loginRequestDto.motPasse(), utilisateur.getMotPasse());
 
         if (!motDePasseValide) {
-            throw new UtilisateurException("Mot de passe incorrect");
+            throw new LoginUtilisateurException("Mot de passe incorrect");
         }
         return Optional.of(UtilisateurDto.versDto(utilisateur));
     }
 
     public FamilleDto obtenirFamilleParUtilisateur(UUID utilisateurUuid) throws UtilisateurException {
         Utilisateur utilisateur = utilisateurRepository.findByUuid(utilisateurUuid).orElseThrow(
-                () -> new UtilisateurException("Utilisateur non trouvé"));
+                () -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
 
         return FamilleDto.versDto(utilisateur.getFamille());
     }
 
     public List<UtilisateurDto> obtenirUtilisateursParFamille(UUID familleUuid) throws UtilisateurException {
         List<Utilisateur> utilisateurs = utilisateurRepository.trouverUtilisateursParFamille(familleUuid).orElseThrow(
-                () -> new UtilisateurException("Famille non trouvée"));
+                () -> new UtilisateurNonTrouveException("Aucun utilisateur trouvé dans cette famille"));
 
         return utilisateurs.stream().map(UtilisateurDto::versDto).toList();
     }
 
     public List<ProduitDto> obtenirProduitsParFamille(UUID familleUuid) throws FamilleException {
         List<Produit> produits = produitRepository.trouverProduitsParFamille(familleUuid).orElseThrow(
-            () -> new FamilleException("Famille non trouvée"));
+            () -> new FamilleNonTrouveException("Famille non trouvée"));
 
         return produits.stream().map(ProduitDto::versDto).toList();
     }

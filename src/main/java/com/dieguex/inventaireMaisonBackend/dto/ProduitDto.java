@@ -5,6 +5,7 @@ import com.dieguex.inventaireMaisonBackend.model.Produit;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record ProduitDto(
         String nom,
@@ -12,7 +13,8 @@ public record ProduitDto(
         double quantiteMinimal,
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate dateLimiteConsommation,
-        CategorieProduit categorieProduit
+        CategorieProduit categorieProduit,
+        UUID uuid
 ) {
     public static ProduitDto versDto(Produit produit){
         if (produit == null) return null;
@@ -21,7 +23,8 @@ public record ProduitDto(
                 produit.getQuantite(),
                 produit.getQuantiteMinimal(),
                 produit.getDateLimiteConsommation(),
-                produit.getCategorieProduit()
+                produit.getCategorieProduit(),
+                produit.getUuid()
         );
     }
     public static Produit versEntite(ProduitDto produitDto){

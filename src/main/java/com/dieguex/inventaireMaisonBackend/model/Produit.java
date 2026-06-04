@@ -1,11 +1,13 @@
 package com.dieguex.inventaireMaisonBackend.model;
 
+import com.dieguex.inventaireMaisonBackend.dto.ProduitDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -15,6 +17,10 @@ public class Produit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.PRIVATE)
     private Long id;
+
+    @Column(nullable = false, unique = true)
+    @Setter(AccessLevel.PRIVATE)
+    private UUID uuid;
 
     private String nom;
     private double quantite;
@@ -34,6 +40,10 @@ public class Produit {
         this.dateLimiteConsommation = builder.dateLimiteConsommation;
         this.categorieProduit = builder.categorieProduit;
         this.famille = builder.famille;
+    }
+    @PrePersist
+    protected void onCreate(){
+        if (this.uuid == null) this.uuid = UUID.randomUUID();
     }
 
     public static class Builder{
@@ -77,6 +87,10 @@ public class Produit {
             return new Produit(this);
         }
     }
-
+    public void modifierProduit(ProduitDto produitDto){
+        this.quantite = produitDto.quantite();
+        this.quantiteMinimal = produitDto.quantiteMinimal();
+        this.dateLimiteConsommation = produitDto.dateLimiteConsommation();
+    }
 
 }

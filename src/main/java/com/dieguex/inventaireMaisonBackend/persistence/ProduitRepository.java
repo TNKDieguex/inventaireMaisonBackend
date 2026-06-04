@@ -17,4 +17,5 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
             WHERE f.uuid = :familleUuid
         """)
     Optional<List<Produit>> trouverProduitsParFamille(@Param("familleUuid") UUID familleUuid);
+    Optional<Produit> findByUuid(UUID uuid);
 }

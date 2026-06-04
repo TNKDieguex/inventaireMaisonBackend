@@ -31,7 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### Configuration Local ###
-src/main/resources/application.properties
-compose.yaml

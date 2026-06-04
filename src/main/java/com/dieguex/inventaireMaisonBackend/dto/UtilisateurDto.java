@@ -15,16 +15,16 @@ public record UtilisateurDto(
         return new UtilisateurDto(
                 utilisateur.getNom(),
                 utilisateur.getCourriel(),
-                utilisateur.getMotPasse(),
+                null,
                 utilisateur.getUuid()
         );
     }
-    public static Utilisateur versEntite(UtilisateurDto utilisateurDto){
+    public static Utilisateur versEntite(UtilisateurDto utilisateurDto, String motDePasse){
         if (utilisateurDto == null) return null;
         return new Utilisateur.Builder()
                 .setNom(utilisateurDto.nom())
                 .setCourriel(utilisateurDto.courriel())
-                .setMotPasse(utilisateurDto.motPasse())
+                .setMotPasse(motDePasse)
                 .build();
     }
 }

@@ -62,4 +62,11 @@ public class Famille {
             return new Famille(this);
         }
     }
+
+    public void supprimerProduit(Produit produit){
+        if (this.listeProduits.contains(produit)){
+            this.listeProduits.remove(produit);
+            produit.setFamille(null);
+        }
+    }
 }

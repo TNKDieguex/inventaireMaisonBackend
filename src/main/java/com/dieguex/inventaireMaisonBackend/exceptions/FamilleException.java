@@ -1,4 +1,4 @@
-package com.dieguex.inventaireMaisonBackend.Exceptions;
+package com.dieguex.inventaireMaisonBackend.exceptions;
 
 public class FamilleException extends Exception {
     public FamilleException(String message) {

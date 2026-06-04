@@ -3,6 +3,7 @@ package com.dieguex.inventaireMaisonBackend.controller;
 import com.dieguex.inventaireMaisonBackend.dto.UtilisateurDto;
 import com.dieguex.inventaireMaisonBackend.exceptions.UtilisateurException;
 import com.dieguex.inventaireMaisonBackend.service.UtilisateurService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class UtilisateurController {
     }
 
     @PostMapping
-    public ResponseEntity<UtilisateurDto> creerUtilisateur(@RequestBody UtilisateurDto utilisateurDto) throws UtilisateurException {
+    public ResponseEntity<UtilisateurDto> creerUtilisateur(@Valid @RequestBody UtilisateurDto utilisateurDto) throws UtilisateurException {
         logger.info("Création d'un utilisateur : {}", utilisateurDto);
         UtilisateurDto utilisateurCree = utilisateurService.creerUtilisateur(utilisateurDto).orElseThrow();
         return ResponseEntity.status(HttpStatus.CREATED).body(utilisateurCree);

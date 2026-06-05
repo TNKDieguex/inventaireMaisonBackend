@@ -3,13 +3,10 @@ package com.dieguex.inventaireMaisonBackend.service;
 import com.dieguex.inventaireMaisonBackend.dto.LoginRequestDto;
 import com.dieguex.inventaireMaisonBackend.exceptions.*;
 import com.dieguex.inventaireMaisonBackend.dto.FamilleDto;
-import com.dieguex.inventaireMaisonBackend.dto.ProduitDto;
 import com.dieguex.inventaireMaisonBackend.dto.UtilisateurDto;
 import com.dieguex.inventaireMaisonBackend.model.Famille;
-import com.dieguex.inventaireMaisonBackend.model.Produit;
 import com.dieguex.inventaireMaisonBackend.model.Utilisateur;
 import com.dieguex.inventaireMaisonBackend.persistence.FamilleRepository;
-import com.dieguex.inventaireMaisonBackend.persistence.ProduitRepository;
 import com.dieguex.inventaireMaisonBackend.persistence.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,17 +21,14 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class UtilisateurService {
     private final FamilleRepository familleRepository;
-    private final ProduitRepository produitRepository;
     private final UtilisateurRepository utilisateurRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     public UtilisateurService(FamilleRepository familleRepository,
-                              ProduitRepository produitRepository,
                               UtilisateurRepository utilisateurRepository) {
         this.familleRepository = familleRepository;
-        this.produitRepository = produitRepository;
         this.utilisateurRepository = utilisateurRepository;
     }
 
@@ -80,42 +74,6 @@ public class UtilisateurService {
         return Optional.of(UtilisateurDto.versDto(utilisateur));
     }
 
-
-    @Transactional(rollbackFor = {ProduitException.class, FamilleException.class})
-    public Optional<List<ProduitDto>> creerProduit(List<ProduitDto> produitDtoList, UUID familleUuid) throws ProduitException, FamilleException {
-        Famille famille = familleRepository.findByUuid(familleUuid).orElseThrow(
-                () -> new FamilleNonTrouveException("Famille non trouvée"));
-
-        List<Produit> produits = produitDtoList.stream().map(ProduitDto::versEntite).toList();
-        produits.forEach((produit) -> {
-            produit.setFamille(famille);
-            famille.getListeProduits().add(produit);
-        });
-        return Optional.of(produitRepository.saveAll(produits).stream().map(ProduitDto::versDto).toList());
-    }
-
-    @Transactional(rollbackFor = ProduitException.class)
-    public Optional<ProduitDto> supprimerProduit(UUID produitUuid) throws ProduitException {
-        Produit produit = produitRepository.findByUuid(produitUuid).orElseThrow(
-                () -> new ProduitException("Produit non trouvé"));
-
-        if (produit.getFamille() != null) {
-            produit.getFamille().supprimerProduit(produit);
-        }
-
-        produitRepository.delete(produit);
-        return Optional.of(ProduitDto.versDto(produit));
-    }
-
-    @Transactional(rollbackFor = ProduitException.class)
-    public Optional<ProduitDto> modifierProduit(ProduitDto produitDto) throws ProduitException{
-        Produit produit = produitRepository.findByUuid(produitDto.uuid()).orElseThrow(
-                () -> new ProduitException("Produit non trouvé"));
-
-        produit.modifierProduit(produitDto);
-        return Optional.of(ProduitDto.versDto(produit));
-    }
-
     public Optional<UtilisateurDto> seConnecter(LoginRequestDto loginRequestDto) throws UtilisateurException, LoginUtilisateurException {
         Utilisateur utilisateur = utilisateurRepository.findByCourriel(loginRequestDto.courriel()).orElseThrow(
                 () -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
@@ -139,12 +97,5 @@ public class UtilisateurService {
                 () -> new UtilisateurNonTrouveException("Aucun utilisateur trouvé dans cette famille"));
 
         return utilisateurs.stream().map(UtilisateurDto::versDto).toList();
-    }
-
-    public List<ProduitDto> obtenirProduitsParFamille(UUID familleUuid) throws FamilleException {
-        List<Produit> produits = produitRepository.trouverProduitsParFamille(familleUuid).orElseThrow(
-            () -> new FamilleNonTrouveException("Famille non trouvée"));
-
-        return produits.stream().map(ProduitDto::versDto).toList();
     }
 }

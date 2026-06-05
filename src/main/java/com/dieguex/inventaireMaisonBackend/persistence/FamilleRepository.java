@@ -8,6 +8,6 @@ import java.util.UUID;
 
 public interface FamilleRepository extends JpaRepository<Famille, Long> {
     Optional<Famille> findByUuid(UUID uuid);
-
     Optional<Object> findByNomFamille(String nomFamille);
+    boolean existsByUuid(UUID uuid);
 }

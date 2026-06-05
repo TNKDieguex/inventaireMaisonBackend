@@ -3,6 +3,7 @@ package com.dieguex.inventaireMaisonBackend.dto;
 import com.dieguex.inventaireMaisonBackend.model.CategorieProduit;
 import com.dieguex.inventaireMaisonBackend.model.Produit;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -14,6 +15,8 @@ public record ProduitDto(
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate dateLimiteConsommation,
         CategorieProduit categorieProduit,
+        @Size(max = 100, message = "Les notes ne peuvent pas dépasser 100 caractères")
+        String notes,
         UUID uuid
 ) {
     public static ProduitDto versDto(Produit produit){
@@ -24,6 +27,7 @@ public record ProduitDto(
                 produit.getQuantiteMinimal(),
                 produit.getDateLimiteConsommation(),
                 produit.getCategorieProduit(),
+                produit.getNotes(),
                 produit.getUuid()
         );
     }
@@ -35,6 +39,7 @@ public record ProduitDto(
                 .setQuantiteMinimal(produitDto.quantiteMinimal())
                 .setDateLimiteConsommation(produitDto.dateLimiteConsommation())
                 .setCategorieProduit(produitDto.categorieProduit())
+                .setNotes(produitDto.notes())
                 .build();
     }
 }

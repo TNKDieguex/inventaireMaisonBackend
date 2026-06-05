@@ -27,6 +27,9 @@ public class Produit {
     private double quantiteMinimal;
     private LocalDate dateLimiteConsommation;
     private CategorieProduit categorieProduit;
+    @Column(name = "notes", length = 100)
+    private String notes;
+
 
     @ManyToOne
     @JoinColumn(name = "famille_id")
@@ -40,6 +43,7 @@ public class Produit {
         this.dateLimiteConsommation = builder.dateLimiteConsommation;
         this.categorieProduit = builder.categorieProduit;
         this.famille = builder.famille;
+        this.notes = builder.notes;
     }
     @PrePersist
     protected void onCreate(){
@@ -53,6 +57,7 @@ public class Produit {
         private LocalDate dateLimiteConsommation;
         private CategorieProduit categorieProduit;
         private Famille famille;
+        private String notes;
 
         public Builder setNom(String nom) {
             this.nom = nom;
@@ -82,6 +87,10 @@ public class Produit {
             this.famille = famille;
             return this;
         }
+        public Builder setNotes(String notes) {
+            this.notes = notes;
+            return this;
+        }
 
         public Produit build() {
             return new Produit(this);
@@ -91,6 +100,7 @@ public class Produit {
         this.quantite = produitDto.quantite();
         this.quantiteMinimal = produitDto.quantiteMinimal();
         this.dateLimiteConsommation = produitDto.dateLimiteConsommation();
+        this.notes = produitDto.notes();
     }
 
 }

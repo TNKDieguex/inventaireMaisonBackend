@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -54,5 +54,19 @@ public class UtilisateurController {
                 seJoindreFamilleDto.utilisateurUuid(), seJoindreFamilleDto.familleUuid());
         UtilisateurDto utilisateurConnecte = utilisateurService.seJoindreAUneFamille(seJoindreFamilleDto.utilisateurUuid(), seJoindreFamilleDto.familleUuid()).orElseThrow();
         return ResponseEntity.ok().body(utilisateurConnecte);
+    }
+
+    @GetMapping("/famille-code")
+    public ResponseEntity<FamilleDto> obtenirCodeFamille(@RequestParam(name = "id", required = true) UUID utilisateurUuid) throws UtilisateurException {
+        logger.info("Récupération du code de la famille de l'utilisateur : {}", utilisateurUuid);
+        FamilleDto familleDto = utilisateurService.obtenirFamilleParUtilisateur(utilisateurUuid);
+        return ResponseEntity.ok().body(familleDto);
+    }
+
+    @GetMapping("/familles/mes-membres")
+    public ResponseEntity<List<UtilisateurDto>> obtenirUtilisateursParFamille(@RequestParam(name = "id", required = true) UUID familleUuid) throws UtilisateurException {
+        logger.info("Récupération des membres de la famille : {}", familleUuid);
+        List<UtilisateurDto> utilisateurDto = utilisateurService.obtenirUtilisateursParFamille(familleUuid);
+        return ResponseEntity.ok().body(utilisateurDto);
     }
 }

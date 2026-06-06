@@ -30,7 +30,7 @@ public class ProduitService {
 
 
     @Transactional(rollbackFor = {ProduitException.class, FamilleException.class})
-    public Optional<List<ProduitDto>> creerProduit(List<ProduitDto> produitDtoList, UUID familleUuid) throws ProduitException, FamilleException {
+    public Optional<List<ProduitDto>> creerProduit(List<ProduitDto> produitDtoList, UUID familleUuid) throws FamilleException {
         Famille famille = familleRepository.findByUuid(familleUuid).orElseThrow(
                 () -> new FamilleNonTrouveException("Famille non trouvée"));
 

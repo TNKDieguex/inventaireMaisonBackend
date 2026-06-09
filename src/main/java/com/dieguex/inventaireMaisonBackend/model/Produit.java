@@ -1,6 +1,6 @@
 package com.dieguex.inventaireMaisonBackend.model;
 
-import com.dieguex.inventaireMaisonBackend.dto.ProduitDto;
+import com.dieguex.inventaireMaisonBackend.dto.UpdateProduitDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -96,7 +96,7 @@ public class Produit {
             return new Produit(this);
         }
     }
-    public void modifierProduit(ProduitDto produitDto){
+    public void modifierProduit(UpdateProduitDto produitDto){
         this.quantite = produitDto.quantite();
         this.quantiteMinimal = produitDto.quantiteMinimal();
         this.dateLimiteConsommation = produitDto.dateLimiteConsommation();

@@ -1,6 +1,7 @@
 package com.dieguex.inventaireMaisonBackend.service;
 
 import com.dieguex.inventaireMaisonBackend.dto.ProduitDto;
+import com.dieguex.inventaireMaisonBackend.dto.UpdateProduitDto;
 import com.dieguex.inventaireMaisonBackend.exceptions.FamilleException;
 import com.dieguex.inventaireMaisonBackend.exceptions.FamilleNonTrouveException;
 import com.dieguex.inventaireMaisonBackend.exceptions.ProduitException;
@@ -56,11 +57,29 @@ public class ProduitService {
     }
 
     @Transactional(rollbackFor = ProduitException.class)
-    public Optional<ProduitDto> modifierProduit(ProduitDto produitDto) throws ProduitException{
+    public Optional<ProduitDto> modifierProduit(UpdateProduitDto produitDto) throws ProduitException{
         Produit produit = produitRepository.findByUuid(produitDto.uuid()).orElseThrow(
                 () -> new ProduitException("Produit non trouvé"));
 
         produit.modifierProduit(produitDto);
+        return Optional.of(ProduitDto.versDto(produit));
+    }
+
+    @Transactional(rollbackFor = ProduitException.class)
+    public Optional<ProduitDto> modifierQuantiteProduit(UUID produitUuid, int nouvelleQuantite) throws ProduitException {
+        Produit produit = produitRepository.findByUuid(produitUuid).orElseThrow(
+                () -> new ProduitException("Produit non trouvé"));
+
+        produit.setQuantite(nouvelleQuantite);
+        return Optional.of(ProduitDto.versDto(produit));
+    }
+
+    @Transactional(rollbackFor = ProduitException.class)
+    public Optional<ProduitDto> modifierNotesProduit(UUID produitUuid, String nouvellesNotes) throws ProduitException{
+        Produit produit = produitRepository.findByUuid(produitUuid).orElseThrow(
+                () -> new ProduitException("Produit non trouvé"));
+
+        produit.setNotes(nouvellesNotes);
         return Optional.of(ProduitDto.versDto(produit));
     }
 

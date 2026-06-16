@@ -1,5 +1,7 @@
 package com.dieguex.inventaireMaisonBackend.service;
 
+import com.dieguex.inventaireMaisonBackend.config.UtilisateurPrincipal;
+import com.dieguex.inventaireMaisonBackend.dto.AuthResponseDto;
 import com.dieguex.inventaireMaisonBackend.dto.LoginRequestDto;
 import com.dieguex.inventaireMaisonBackend.exceptions.*;
 import com.dieguex.inventaireMaisonBackend.dto.FamilleDto;
@@ -22,14 +24,17 @@ import java.util.UUID;
 public class UtilisateurService {
     private final FamilleRepository familleRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final JwtService jwtService;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     public UtilisateurService(FamilleRepository familleRepository,
-                              UtilisateurRepository utilisateurRepository) {
+                              UtilisateurRepository utilisateurRepository,
+                              JwtService jwtService) {
         this.familleRepository = familleRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.jwtService = jwtService;
     }
 
     @Transactional(rollbackFor = UtilisateurException.class)
@@ -74,7 +79,7 @@ public class UtilisateurService {
         return Optional.of(UtilisateurDto.versDto(utilisateur));
     }
 
-    public Optional<UtilisateurDto> seConnecter(LoginRequestDto loginRequestDto) throws UtilisateurException, LoginUtilisateurException {
+    public Optional<AuthResponseDto> seConnecter(LoginRequestDto loginRequestDto) throws UtilisateurException, LoginUtilisateurException {
         Utilisateur utilisateur = utilisateurRepository.findByCourriel(loginRequestDto.courriel()).orElseThrow(
                 () -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
         boolean motDePasseValide = passwordEncoder.matches(loginRequestDto.motPasse(), utilisateur.getMotPasse());
@@ -82,7 +87,9 @@ public class UtilisateurService {
         if (!motDePasseValide) {
             throw new LoginUtilisateurException("Mot de passe incorrect");
         }
-        return Optional.of(UtilisateurDto.versDto(utilisateur));
+        String jwtToken = jwtService.generateToken(new UtilisateurPrincipal(utilisateur));
+        UtilisateurDto utilisateurDto = UtilisateurDto.versDto(utilisateur);
+        return Optional.of(new AuthResponseDto(jwtToken, utilisateurDto));
     }
 
     public FamilleDto obtenirFamilleParUtilisateur(UUID utilisateurUuid) throws UtilisateurException {

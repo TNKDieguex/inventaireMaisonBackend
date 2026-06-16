@@ -35,9 +35,11 @@ public class UtilisateurController {
     }
 
     @PostMapping("/connexion")
-    public ResponseEntity<UtilisateurDto> seConnecter(@Valid @RequestBody LoginRequestDto loginRequestDto) throws LoginUtilisateurException, UtilisateurException {
+    public ResponseEntity<AuthResponseDto> seConnecter(@Valid @RequestBody LoginRequestDto loginRequestDto) throws LoginUtilisateurException, UtilisateurException {
         logger.info("Connexion d'un utilisateur : {}", loginRequestDto.courriel());
-        UtilisateurDto utilisateurConnecte = utilisateurService.seConnecter(loginRequestDto).orElseThrow();
+
+        AuthResponseDto utilisateurConnecte = utilisateurService.seConnecter(loginRequestDto).orElseThrow();
+
         return ResponseEntity.ok().body(utilisateurConnecte);
     }
 

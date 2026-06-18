@@ -70,7 +70,8 @@ public class UtilisateurController {
     }
 
     @GetMapping("/familles/mes-membres")
-    public ResponseEntity<List<UtilisateurDto>> obtenirUtilisateursParFamille(@RequestParam(name = "id", required = true) UUID familleUuid) throws UtilisateurException {
+    public ResponseEntity<List<UtilisateurDto>> obtenirUtilisateursParFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException {
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
         logger.info("Récupération des membres de la famille : {}", familleUuid);
         List<UtilisateurDto> utilisateurDto = utilisateurService.obtenirUtilisateursParFamille(familleUuid);
         return ResponseEntity.ok().body(utilisateurDto);

@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public record CreationFamilleDto(
         @NotBlank(message = "Le nom de la famille est obligatoire")
-        String nomFamille,
-        UUID utilisateurUuid
+        String nomFamille
 ) {
 }

@@ -47,10 +47,12 @@ public class UtilisateurController {
     }
 
     @PostMapping("/familles")
-    public ResponseEntity<FamilleDto> creerFamille(@Valid @RequestBody CreationFamilleDto creationFamilleDto) throws UtilisateurException {
+    public ResponseEntity<AuthResponseDto> creerFamille(@Valid @RequestBody CreationFamilleDto creationFamilleDto,
+                                                   @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException {
         logger.info("Création d'une famille : {}", creationFamilleDto.nomFamille());
-        FamilleDto familleCree = utilisateurService.creerFamille(creationFamilleDto.utilisateurUuid(), creationFamilleDto.nomFamille()).orElseThrow();
-        return ResponseEntity.status(HttpStatus.CREATED).body(familleCree);
+        UUID utilisateurUuid = utilisateurPrincipal.getUtilisateur().getUuid();
+        AuthResponseDto authResponseDto = utilisateurService.creerFamille(utilisateurUuid, creationFamilleDto.nomFamille());
+        return ResponseEntity.status(HttpStatus.CREATED).body(authResponseDto);
     }
 
     @PostMapping("/rejoindre-famille")

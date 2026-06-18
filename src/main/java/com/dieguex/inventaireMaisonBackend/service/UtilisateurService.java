@@ -49,7 +49,7 @@ public class UtilisateurService {
     }
 
     @Transactional(rollbackFor = UtilisateurException.class)
-    public Optional<FamilleDto> creerFamille(UUID utilisateurUuid, String nomFamille) throws UtilisateurException{
+    public AuthResponseDto creerFamille(UUID utilisateurUuid, String nomFamille) throws UtilisateurException{
         Utilisateur utilisateur = utilisateurRepository.findByUuid(utilisateurUuid)
                 .orElseThrow(() -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
         if (utilisateur.getFamille() != null) {
@@ -60,8 +60,10 @@ public class UtilisateurService {
                 .build();
         familleRepository.save(famille);
         utilisateur.setFamille(famille);
+        UtilisateurPrincipal principal = new UtilisateurPrincipal(utilisateur);
+        String nouveauToken = jwtService.generateToken(principal);
 
-        return Optional.of(FamilleDto.versDto(famille));
+        return new AuthResponseDto(nouveauToken, UtilisateurDto.versDto(utilisateur));
     }
 
     @Transactional(rollbackFor = {UtilisateurException.class, FamilleException.class})

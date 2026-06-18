@@ -65,7 +65,7 @@ public class UtilisateurService {
     }
 
     @Transactional(rollbackFor = {UtilisateurException.class, FamilleException.class})
-    public Optional<UtilisateurDto> seJoindreAUneFamille(UUID utilisateurUuid, UUID familleUuid)throws UtilisateurException, FamilleException {
+    public AuthResponseDto seJoindreAUneFamille(UUID utilisateurUuid, UUID familleUuid)throws UtilisateurException, FamilleException {
         Utilisateur utilisateur = utilisateurRepository.findByUuid(utilisateurUuid)
                 .orElseThrow(() -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
         Famille famille = familleRepository.findByUuid(familleUuid)
@@ -75,8 +75,10 @@ public class UtilisateurService {
             throw new FamilleException("L'utilisateur est déjà dans une famille");
         }
         utilisateur.setFamille(famille);
+        UtilisateurPrincipal principal = new UtilisateurPrincipal(utilisateur);
+        String nuevoToken = jwtService.generateToken(principal);
 
-        return Optional.of(UtilisateurDto.versDto(utilisateur));
+        return new AuthResponseDto(nuevoToken, UtilisateurDto.versDto(utilisateur));
     }
 
     public Optional<AuthResponseDto> seConnecter(LoginRequestDto loginRequestDto) throws UtilisateurException, LoginUtilisateurException {

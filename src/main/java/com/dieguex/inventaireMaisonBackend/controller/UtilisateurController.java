@@ -54,11 +54,14 @@ public class UtilisateurController {
     }
 
     @PostMapping("/rejoindre-famille")
-    public ResponseEntity<UtilisateurDto> seJoindreAUneFamille(@RequestBody SeJoindreFamilleDto seJoindreFamilleDto) throws UtilisateurException, FamilleException {
-        logger.info("Tentative d'association de l'utilisateur {} à la famille {}",
-                seJoindreFamilleDto.utilisateurUuid(), seJoindreFamilleDto.familleUuid());
-        UtilisateurDto utilisateurConnecte = utilisateurService.seJoindreAUneFamille(seJoindreFamilleDto.utilisateurUuid(), seJoindreFamilleDto.familleUuid()).orElseThrow();
-        return ResponseEntity.ok().body(utilisateurConnecte);
+    public ResponseEntity<AuthResponseDto> seJoindreAUneFamille(@RequestBody RejoindreFamilleDto rejoindreFamilleDto,
+                                                               @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException, FamilleException {
+        UUID utilisateurUuid = utilisateurPrincipal.getUtilisateur().getUuid();
+        logger.info("L'utilisateur connecté {} tente de rejoindre la famille {}",
+                utilisateurUuid, rejoindreFamilleDto.familleUuid());
+        AuthResponseDto utilisateurModifie = utilisateurService
+                .seJoindreAUneFamille(utilisateurUuid, rejoindreFamilleDto.familleUuid());
+        return ResponseEntity.ok().body(utilisateurModifie);
     }
 
     @GetMapping("/famille-code")

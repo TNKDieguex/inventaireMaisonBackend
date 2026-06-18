@@ -1,15 +1,18 @@
 package com.dieguex.inventaireMaisonBackend.controller;
 
+import com.dieguex.inventaireMaisonBackend.config.UtilisateurPrincipal;
 import com.dieguex.inventaireMaisonBackend.dto.*;
 import com.dieguex.inventaireMaisonBackend.exceptions.FamilleException;
 import com.dieguex.inventaireMaisonBackend.exceptions.LoginUtilisateurException;
 import com.dieguex.inventaireMaisonBackend.exceptions.UtilisateurException;
+import com.dieguex.inventaireMaisonBackend.model.Famille;
 import com.dieguex.inventaireMaisonBackend.service.UtilisateurService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,9 +62,10 @@ public class UtilisateurController {
     }
 
     @GetMapping("/famille-code")
-    public ResponseEntity<FamilleDto> obtenirCodeFamille(@RequestParam(name = "id", required = true) UUID utilisateurUuid) throws UtilisateurException {
-        logger.info("Récupération du code de la famille de l'utilisateur : {}", utilisateurUuid);
-        FamilleDto familleDto = utilisateurService.obtenirFamilleParUtilisateur(utilisateurUuid);
+    public ResponseEntity<FamilleDto> obtenirCodeFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException {
+        Famille famille = utilisateurPrincipal.getUtilisateur().getFamille();
+        logger.info("Récupération du code de la famille de l'utilisateur : {}", famille.getUuid());
+        FamilleDto familleDto = FamilleDto.versDto(famille);
         return ResponseEntity.ok().body(familleDto);
     }
 

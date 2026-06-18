@@ -28,44 +28,54 @@ public class ProduitController {
     }
 
     @PostMapping("/creation")
-    public ResponseEntity<List<ProduitDto>> creerProduit(@Valid @RequestBody CreationProduitsDto creationProduitsDto) throws FamilleException{
-        logger.info("Création des produits : {}", creationProduitsDto.produitDtoList().size() + " produits");
-        List<ProduitDto> produitDtoList = produitService.creerProduit(creationProduitsDto.produitDtoList(), creationProduitsDto.familleUuid()).orElseThrow();
-        return ResponseEntity.status(HttpStatus.CREATED).body(produitDtoList);
+    public ResponseEntity<List<ProduitDto>> creerProduit(@Valid @RequestBody List<ProduitDto> produitDtoList,
+                                                         @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws FamilleException{
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        logger.info("Création de {} produits pour la famille : {}", produitDtoList.size(), familleUuid);
+        List<ProduitDto> produitDtoListResultat = produitService.creerProduit(produitDtoList, familleUuid).orElseThrow();
+        return ResponseEntity.status(HttpStatus.CREATED).body(produitDtoListResultat);
     }
 
     @PatchMapping("/{uuid}/quantite")
     public ResponseEntity<ProduitDto> modifierQuantiteProduit(@PathVariable UUID uuid,
-                                                              @Valid @RequestBody UpdateQuantiteProduitDto updateQuantiteProduitDto) throws ProduitException {
-        logger.info("Modification de la quantité du produit : {}", uuid);
-        ProduitDto produitDto = produitService.modifierQuantiteProduit(uuid, updateQuantiteProduitDto.quantite())
+                                                              @Valid @RequestBody UpdateQuantiteProduitDto updateQuantiteProduitDto,
+                                                              @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws ProduitException {
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        logger.info("Modification de la quantité du produit : {} (Famille: {})", uuid, familleUuid);
+        ProduitDto produitDto = produitService.modifierQuantiteProduit(uuid, updateQuantiteProduitDto.quantite(), familleUuid)
                 .orElseThrow();
         return ResponseEntity.ok().body(produitDto);
     }
 
     @PatchMapping("/{uuid}/notes")
     public ResponseEntity<ProduitDto> modifierNotesProduit(@PathVariable UUID uuid,
-                                                           @Valid @RequestBody UpdateNoteProduitDto updateNoteProduitDto) throws ProduitException {
-        logger.info("Modification des notes du produit : {}", uuid);
-        ProduitDto produitDto = produitService.modifierNotesProduit(uuid,updateNoteProduitDto.notes())
+                                                           @Valid @RequestBody UpdateNoteProduitDto updateNoteProduitDto,
+                                                           @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws ProduitException {
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        logger.info("Modification des notes du produit : {} (Famille: {})", uuid, familleUuid);
+        ProduitDto produitDto = produitService.modifierNotesProduit(uuid,updateNoteProduitDto.notes(), familleUuid)
                 .orElseThrow();
         return ResponseEntity.ok().body(produitDto);
     }
     @PutMapping("/modifierProduit")
-    public ResponseEntity<ProduitDto> modifierProduit(@Valid @RequestBody UpdateProduitDto produitDto) throws ProduitException {
-        logger.info("Modification du produit : {}", produitDto.uuid());
-        ProduitDto produitModifie = produitService.modifierProduit(produitDto).orElseThrow();
+    public ResponseEntity<ProduitDto> modifierProduit(@Valid @RequestBody UpdateProduitDto produitDto,
+                                                      @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws ProduitException {
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        logger.info("Modification sécurisée du produit : {} (Famille: {})", produitDto.uuid(), familleUuid);
+        ProduitDto produitModifie = produitService.modifierProduit(produitDto, familleUuid).orElseThrow();
         return ResponseEntity.ok().body(produitModifie);
     }
 
-    @DeleteMapping("/{uuid}/effacerProdutit")
-    public ResponseEntity<ProduitDto> supprimerProduit(@PathVariable UUID uuid) throws ProduitException {
-        logger.info("Suppression du produit : {}", uuid);
-        ProduitDto produitDto = produitService.supprimerProduit(uuid).orElseThrow();
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<ProduitDto> supprimerProduit(@PathVariable UUID uuid,
+                                                       @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws ProduitException {
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        logger.info("Suppression sécurisée du produit : {} pour la famille : {}", uuid, familleUuid);
+        ProduitDto produitDto = produitService.supprimerProduit(uuid, familleUuid).orElseThrow();
         return ResponseEntity.ok().body(produitDto);
     }
 
-    @GetMapping("/famille-code")
+    @GetMapping
     public ResponseEntity<List<ProduitDto>> obtenirProduitsParFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws FamilleException {
         UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
         logger.info("Récupération des produits de la famille : {}", familleUuid);
@@ -75,8 +85,8 @@ public class ProduitController {
 
     @GetMapping("/liste-alertes-achats")
     public ResponseEntity<List<ProduitDto>> genererListeAlertesEtAchats(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal){
-        logger.info("Génération de la liste d'alertes et d'achats");
         UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        logger.info("Génération de la liste d'alertes pour la famille: {}", familleUuid);
         List<ProduitDto> produitDto = produitService.genererListeAlertesEtAchats(familleUuid);
         return ResponseEntity.ok().body(produitDto);
     }

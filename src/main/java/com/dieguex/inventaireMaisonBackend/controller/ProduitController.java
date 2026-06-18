@@ -1,5 +1,6 @@
 package com.dieguex.inventaireMaisonBackend.controller;
 
+import com.dieguex.inventaireMaisonBackend.config.UtilisateurPrincipal;
 import com.dieguex.inventaireMaisonBackend.dto.*;
 import com.dieguex.inventaireMaisonBackend.exceptions.FamilleException;
 import com.dieguex.inventaireMaisonBackend.exceptions.ProduitException;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,16 +66,18 @@ public class ProduitController {
     }
 
     @GetMapping("/famille-code")
-    public ResponseEntity<List<ProduitDto>> obtenirProduitsParFamille(@RequestParam(name = "id", required = true) UUID familleUuid) throws FamilleException {
+    public ResponseEntity<List<ProduitDto>> obtenirProduitsParFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws FamilleException {
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
         logger.info("Récupération des produits de la famille : {}", familleUuid);
         List<ProduitDto> produitDto = produitService.obtenirProduitsParFamille(familleUuid);
         return ResponseEntity.ok().body(produitDto);
     }
 
     @GetMapping("/liste-alertes-achats")
-    public ResponseEntity<List<ProduitDto>> genererListeAlertesEtAchats(){
+    public ResponseEntity<List<ProduitDto>> genererListeAlertesEtAchats(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal){
         logger.info("Génération de la liste d'alertes et d'achats");
-        List<ProduitDto> produitDto = produitService.genererListeAlertesEtAchats();
+        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        List<ProduitDto> produitDto = produitService.genererListeAlertesEtAchats(familleUuid);
         return ResponseEntity.ok().body(produitDto);
     }
 }

@@ -16,6 +16,10 @@ public class UtilisateurPrincipal implements UserDetails {
         this.utilisateur = utilisateur;
     }
 
+    public Utilisateur getUtilisateur(){
+        return this.utilisateur;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));

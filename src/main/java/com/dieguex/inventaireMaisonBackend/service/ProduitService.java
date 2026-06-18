@@ -44,9 +44,9 @@ public class ProduitService {
     }
 
     @Transactional(rollbackFor = ProduitException.class)
-    public Optional<ProduitDto> supprimerProduit(UUID produitUuid) throws ProduitException {
-        Produit produit = produitRepository.findByUuid(produitUuid).orElseThrow(
-                () -> new ProduitException("Produit non trouvé"));
+    public Optional<ProduitDto> supprimerProduit(UUID produitUuid, UUID familleUuid) throws ProduitException {
+        Produit produit = produitRepository.findByUuidAndFamilleUuid(produitUuid, familleUuid).orElseThrow(
+                () -> new ProduitException("Produit introuvable ou accès refusé"));
 
         if (produit.getFamille() != null) {
             produit.getFamille().supprimerProduit(produit);
@@ -57,27 +57,27 @@ public class ProduitService {
     }
 
     @Transactional(rollbackFor = ProduitException.class)
-    public Optional<ProduitDto> modifierProduit(UpdateProduitDto produitDto) throws ProduitException{
-        Produit produit = produitRepository.findByUuid(produitDto.uuid()).orElseThrow(
-                () -> new ProduitException("Produit non trouvé"));
+    public Optional<ProduitDto> modifierProduit(UpdateProduitDto produitDto, UUID familleUuid) throws ProduitException{
+        Produit produit = produitRepository.findByUuidAndFamilleUuid(produitDto.uuid(), familleUuid).orElseThrow(
+                () -> new ProduitException("Produit introuvable ou accès refusé"));
 
         produit.modifierProduit(produitDto);
         return Optional.of(ProduitDto.versDto(produit));
     }
 
     @Transactional(rollbackFor = ProduitException.class)
-    public Optional<ProduitDto> modifierQuantiteProduit(UUID produitUuid, int nouvelleQuantite) throws ProduitException {
-        Produit produit = produitRepository.findByUuid(produitUuid).orElseThrow(
-                () -> new ProduitException("Produit non trouvé"));
+    public Optional<ProduitDto> modifierQuantiteProduit(UUID produitUuid, int nouvelleQuantite, UUID familleUuid) throws ProduitException {
+        Produit produit = produitRepository.findByUuidAndFamilleUuid(produitUuid, familleUuid).orElseThrow(
+                () -> new ProduitException("Produit introuvable ou accès refusé"));
 
         produit.setQuantite(nouvelleQuantite);
         return Optional.of(ProduitDto.versDto(produit));
     }
 
     @Transactional(rollbackFor = ProduitException.class)
-    public Optional<ProduitDto> modifierNotesProduit(UUID produitUuid, String nouvellesNotes) throws ProduitException{
-        Produit produit = produitRepository.findByUuid(produitUuid).orElseThrow(
-                () -> new ProduitException("Produit non trouvé"));
+    public Optional<ProduitDto> modifierNotesProduit(UUID produitUuid, String nouvellesNotes, UUID familleUuid) throws ProduitException{
+        Produit produit = produitRepository.findByUuidAndFamilleUuid(produitUuid, familleUuid).orElseThrow(
+                () -> new ProduitException("Produit introuvable ou accès refusé"));
 
         produit.setNotes(nouvellesNotes);
         return Optional.of(ProduitDto.versDto(produit));
@@ -92,11 +92,11 @@ public class ProduitService {
         return produits.stream().map(ProduitDto::versDto).toList();
     }
 
-    public List<ProduitDto> genererListeAlertesEtAchats(){
+    public List<ProduitDto> genererListeAlertesEtAchats(UUID familleUuid){
         LocalDate aujourdHui = LocalDate.now();
         LocalDate dateLimite = aujourdHui.plusDays(7);
 
-        List<Produit> produits = produitRepository.findProduitsAlerte(dateLimite);
+        List<Produit> produits = produitRepository.findProduitsAlerte(dateLimite,familleUuid);
         return produits.stream().map(ProduitDto::versDto).toList();
     }
 }

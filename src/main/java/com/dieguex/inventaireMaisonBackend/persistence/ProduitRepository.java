@@ -17,11 +17,13 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
             """)
     List<Produit> trouverProduitsParFamille(@Param("familleUuid") UUID familleUuid);
     @Query("""
-            SELECT p FROM Produit p WHERE (p.quantite <= p.quantiteMinimal)
-            OR (p.dateLimiteConsommation IS NOT NULL
-                        AND p.dateLimiteConsommation <= :dateLimite AND p.quantite > 0)
-           """)
-    List<Produit> findProduitsAlerte(@Param("dateLimite")LocalDate dateLimite);
-    Optional<Produit> findByUuid(UUID uuid);
+            SELECT p FROM Produit p WHERE p.famille.uuid = :familleUuid 
+                AND ((p.quantite <= p.quantiteMinimal)
+                OR (p.dateLimiteConsommation IS NOT NULL
+                AND p.dateLimiteConsommation <= :dateLimite AND p.quantite > 0))
+       """)
+    List<Produit> findProduitsAlerte(@Param("dateLimite")LocalDate dateLimite,
+    @Param("familleUuid")UUID familleUuid);
+    Optional<Produit> findByUuidAndFamilleUuid(UUID uuid, UUID familleUuid);
 
 }

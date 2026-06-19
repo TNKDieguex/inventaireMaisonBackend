@@ -91,7 +91,8 @@ public class UtilisateurService {
         if (!motDePasseValide) {
             throw new LoginUtilisateurException("Mot de passe incorrect");
         }
-        String jwtToken = jwtService.generateToken(new UtilisateurPrincipal(utilisateur));
+        UtilisateurPrincipal principal = new UtilisateurPrincipal(utilisateur);
+        String jwtToken = jwtService.generateToken(principal);
         UtilisateurDto utilisateurDto = UtilisateurDto.versDto(utilisateur);
         return Optional.of(new AuthResponseDto(jwtToken, utilisateurDto));
     }
@@ -103,10 +104,20 @@ public class UtilisateurService {
         return FamilleDto.versDto(utilisateur.getFamille());
     }
 
-    public List<UtilisateurDto> obtenirUtilisateursParFamille(UUID familleUuid) throws UtilisateurException {
-        List<Utilisateur> utilisateurs = utilisateurRepository.trouverUtilisateursParFamille(familleUuid).orElseThrow(
-                () -> new UtilisateurNonTrouveException("Aucun utilisateur trouvé dans cette famille"));
+    public FamilleDto obtenirInfoFamille(UUID familleUuid) throws UtilisateurException {
+        List<Utilisateur> utilisateurs = utilisateurRepository.trouverUtilisateursParFamille(familleUuid)
+                .orElseThrow(() -> new UtilisateurNonTrouveException("Aucun utilisateur trouvé dans cette famille"));
 
-        return utilisateurs.stream().map(UtilisateurDto::versDto).toList();
+        Famille famille = utilisateurs.getFirst().getFamille();
+
+        List<UtilisateurDto> membresDto = utilisateurs.stream()
+                .map(UtilisateurDto::versDto)
+                .toList();
+
+        return new FamilleDto(
+                famille.getNomFamille(),
+                membresDto,
+                famille.getUuid()
+        );
     }
 }

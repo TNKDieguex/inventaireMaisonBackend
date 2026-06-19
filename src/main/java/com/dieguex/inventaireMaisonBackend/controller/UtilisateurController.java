@@ -5,7 +5,6 @@ import com.dieguex.inventaireMaisonBackend.dto.*;
 import com.dieguex.inventaireMaisonBackend.exceptions.FamilleException;
 import com.dieguex.inventaireMaisonBackend.exceptions.LoginUtilisateurException;
 import com.dieguex.inventaireMaisonBackend.exceptions.UtilisateurException;
-import com.dieguex.inventaireMaisonBackend.model.Famille;
 import com.dieguex.inventaireMaisonBackend.service.UtilisateurService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 
@@ -42,7 +40,6 @@ public class UtilisateurController {
         logger.info("Connexion d'un utilisateur : {}", loginRequestDto.courriel());
 
         AuthResponseDto utilisateurConnecte = utilisateurService.seConnecter(loginRequestDto).orElseThrow();
-
         return ResponseEntity.ok().body(utilisateurConnecte);
     }
 
@@ -66,19 +63,11 @@ public class UtilisateurController {
         return ResponseEntity.ok().body(utilisateurModifie);
     }
 
-    @GetMapping("/famille-code")
-    public ResponseEntity<FamilleDto> obtenirCodeFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException {
-        Famille famille = utilisateurPrincipal.getUtilisateur().getFamille();
-        logger.info("Récupération du code de la famille de l'utilisateur : {}", famille.getUuid());
-        FamilleDto familleDto = FamilleDto.versDto(famille);
-        return ResponseEntity.ok().body(familleDto);
-    }
-
-    @GetMapping("/familles/mes-membres")
-    public ResponseEntity<List<UtilisateurDto>> obtenirUtilisateursParFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException {
+    @GetMapping("/familles/info")
+    public ResponseEntity<FamilleDto> obtenirInfoFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException {
         UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
         logger.info("Récupération des membres de la famille : {}", familleUuid);
-        List<UtilisateurDto> utilisateurDto = utilisateurService.obtenirUtilisateursParFamille(familleUuid);
-        return ResponseEntity.ok().body(utilisateurDto);
+        FamilleDto familleDto = utilisateurService.obtenirInfoFamille(familleUuid);
+        return ResponseEntity.ok().body(familleDto);
     }
 }

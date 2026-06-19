@@ -1,5 +1,6 @@
 package com.dieguex.inventaireMaisonBackend.service;
 
+import com.dieguex.inventaireMaisonBackend.config.UtilisateurPrincipal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -30,22 +31,29 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UtilisateurPrincipal utilisateurPrincipal) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        var utilisateur = utilisateurPrincipal.getUtilisateur();
+        extraClaims.put("utilisateurUuid", utilisateur.getUuid().toString());
+        if (utilisateur.getFamille() != null) {
+            extraClaims.put("familleUuid", utilisateur.getFamille().getUuid().toString());
+        } else {
+            extraClaims.put("familleUuid", null);
+        }
+
+        return generateToken(extraClaims, utilisateurPrincipal);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(Map<String, Object> extraClaims, UtilisateurPrincipal userDetails) {
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    // ✅ Validar si el token le pertenece al usuario y no ha expirado
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
@@ -59,7 +67,6 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // 🧐 Descifrar y leer el contenido completo del token usando la firma
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -68,7 +75,6 @@ public class JwtService {
                 .getPayload();
     }
 
-    // 🔑 Generar la llave criptográfica usando la clave inyectada
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);

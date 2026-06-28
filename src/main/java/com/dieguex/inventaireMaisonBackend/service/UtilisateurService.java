@@ -89,7 +89,7 @@ public class UtilisateurService {
         boolean motDePasseValide = passwordEncoder.matches(loginRequestDto.motPasse(), utilisateur.getMotPasse());
 
         if (!motDePasseValide) {
-            throw new LoginUtilisateurException("Mot de passe incorrect");
+            throw new LoginUtilisateurException("Mot de passe ou courriel incorrect");
         }
         UtilisateurPrincipal principal = new UtilisateurPrincipal(utilisateur);
         String jwtToken = jwtService.generateToken(principal);

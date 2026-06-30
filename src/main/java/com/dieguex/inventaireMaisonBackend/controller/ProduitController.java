@@ -4,6 +4,7 @@ import com.dieguex.inventaireMaisonBackend.config.UtilisateurPrincipal;
 import com.dieguex.inventaireMaisonBackend.dto.*;
 import com.dieguex.inventaireMaisonBackend.exceptions.FamilleException;
 import com.dieguex.inventaireMaisonBackend.exceptions.ProduitException;
+import com.dieguex.inventaireMaisonBackend.model.Utilisateur;
 import com.dieguex.inventaireMaisonBackend.service.ProduitService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -30,7 +31,11 @@ public class ProduitController {
     @PostMapping("/creation")
     public ResponseEntity<List<ProduitDto>> creerProduit(@Valid @RequestBody List<ProduitDto> produitDtoList,
                                                          @AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws FamilleException{
-        UUID familleUuid = utilisateurPrincipal.getUtilisateur().getFamille().getUuid();
+        Utilisateur utilisateur = utilisateurPrincipal.getUtilisateur();
+        if (utilisateur.getFamille() == null) {
+            throw new FamilleException("L'utilisateur n'est pas associé à une famille");
+        }
+        UUID familleUuid = utilisateur.getFamille().getUuid();
         logger.info("Création de {} produits pour la famille : {}", produitDtoList.size(), familleUuid);
         List<ProduitDto> produitDtoListResultat = produitService.creerProduit(produitDtoList, familleUuid).orElseThrow();
         return ResponseEntity.status(HttpStatus.CREATED).body(produitDtoListResultat);

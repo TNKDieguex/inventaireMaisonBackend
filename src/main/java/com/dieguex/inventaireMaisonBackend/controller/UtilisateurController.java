@@ -5,6 +5,7 @@ import com.dieguex.inventaireMaisonBackend.dto.*;
 import com.dieguex.inventaireMaisonBackend.exceptions.FamilleException;
 import com.dieguex.inventaireMaisonBackend.exceptions.LoginUtilisateurException;
 import com.dieguex.inventaireMaisonBackend.exceptions.UtilisateurException;
+import com.dieguex.inventaireMaisonBackend.model.Utilisateur;
 import com.dieguex.inventaireMaisonBackend.service.UtilisateurService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -60,6 +61,17 @@ public class UtilisateurController {
                 utilisateurUuid, rejoindreFamilleDto.familleUuid());
         AuthResponseDto utilisateurModifie = utilisateurService
                 .seJoindreAUneFamille(utilisateurUuid, rejoindreFamilleDto.familleUuid());
+        return ResponseEntity.ok().body(utilisateurModifie);
+    }
+
+    @PostMapping("/quitter-famille")
+    public ResponseEntity<AuthResponseDto> quitterFamille(@AuthenticationPrincipal UtilisateurPrincipal utilisateurPrincipal) throws UtilisateurException, FamilleException {
+
+        UUID utilisateurUuid = utilisateurPrincipal.getUtilisateur().getUuid();
+        logger.info("L'utilisateur connecté {} tente de quitter la famille",
+                utilisateurUuid);
+        AuthResponseDto utilisateurModifie = utilisateurService
+                .quitterFamille(utilisateurUuid);
         return ResponseEntity.ok().body(utilisateurModifie);
     }
 

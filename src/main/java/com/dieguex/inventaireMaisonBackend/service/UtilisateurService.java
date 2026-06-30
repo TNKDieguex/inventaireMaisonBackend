@@ -83,6 +83,21 @@ public class UtilisateurService {
         return new AuthResponseDto(nuevoToken, UtilisateurDto.versDto(utilisateur));
     }
 
+    @Transactional(rollbackFor = {UtilisateurException.class, FamilleException.class})
+    public AuthResponseDto quitterFamille(UUID utilisateurUuid) throws UtilisateurException, FamilleException {
+        Utilisateur utilisateur = utilisateurRepository.findByUuid(utilisateurUuid)
+                .orElseThrow(() -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));
+        if (utilisateur.getFamille() == null) {
+            throw new FamilleException("L'utilisateur n'est pas dans une famille");
+        }
+
+        utilisateur.setFamille(null);
+        UtilisateurPrincipal principal = new UtilisateurPrincipal(utilisateur);
+        String nouveauToken = jwtService.generateToken(principal);
+
+        return new AuthResponseDto(nouveauToken, UtilisateurDto.versDto(utilisateur));
+    }
+
     public Optional<AuthResponseDto> seConnecter(LoginRequestDto loginRequestDto) throws UtilisateurException, LoginUtilisateurException {
         Utilisateur utilisateur = utilisateurRepository.findByCourriel(loginRequestDto.courriel()).orElseThrow(
                 () -> new UtilisateurNonTrouveException("Utilisateur non trouvé"));

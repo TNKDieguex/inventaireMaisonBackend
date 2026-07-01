@@ -1,13 +1,19 @@
 package com.dieguex.inventaireMaisonBackend.model;
 
 public enum CategorieProduit {
-    LAITIER,
-    FRUIT_ET_LEGUME,
+    FRUIT_ET_LEGUMES,
+    LAITIER_ET_OEUFS,
+    GARDE_MANGER,
     VIANDE,
+    POISSON_ET_FRUITS_DE_MER,
     BOISSONS,
-    EPICES,
-    SURGELES,
     SNACKS,
-    NETTOYAGE,
+    SAUCES_ET_CONDIMENTS,
+    ENTRETIEN_MENAGER_ET_NETTOYAGE,
+    SOINS_ET_BEAUTE,
+    ESSENTIELS_POUR_ANIMAUX,
+    SURGELES,
+    BIOLOGIQUE,
+    PAIN_ET_PATISSERIES,
     AUTRES
 }
